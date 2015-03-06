@@ -4,11 +4,15 @@ var cheerio = require('cheerio');
 var html = require('html-json');
 var request = request.defaults({jar: true, followAllRedirects: true});
 
-modules.export doLogin = function(loginData){
-	loginPostemobile(loginData);
+module.exports = function(loginData){
+	if(loginData)
+		loginPostemobile(loginData);
+	else
+		console.log("No login data");
+	return true;
 }
 
-function loginRedirection(loginData) {
+function loginPostemobile(loginData) {
 	var loginURL = 'https://www.postemobile.it/areaprotetta/pagine/login.aspx?ReturnUrl=%2fareapersonale%2fPrivati%2f_layouts%2fAuthenticate.aspx%3fSource%3d%252Fareapersonale%252Fprivati%252FPagine%252FPM13%252FBonus%252Easpx&Source=%2Fareapersonale%2Fprivati%2FPagine%2FPM13%2FBonus%2Easpx';
 	var bonusURL = "https://www.postemobile.it/areapersonale/privati/Pagine/PM13/Bonus.aspx";
 	request.get(loginURL, function(err, res, body) {
