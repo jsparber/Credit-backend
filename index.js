@@ -1,14 +1,14 @@
 var request = require('request');
 var moment = require('moment');
-var loginData = require('./loginData');
 var cheerio = require('cheerio');
 var html = require('html-json');
 var request = request.defaults({jar: true, followAllRedirects: true});
 
-console.log("Login as " + loginData().user);
-loginRedirection();
+modules.export doLogin = function(loginData){
+	loginPostemobile(loginData);
+}
 
-function loginRedirection() {
+function loginRedirection(loginData) {
 	var loginURL = 'https://www.postemobile.it/areaprotetta/pagine/login.aspx?ReturnUrl=%2fareapersonale%2fPrivati%2f_layouts%2fAuthenticate.aspx%3fSource%3d%252Fareapersonale%252Fprivati%252FPagine%252FPM13%252FBonus%252Easpx&Source=%2Fareapersonale%2Fprivati%2FPagine%2FPM13%2FBonus%2Easpx';
 	var bonusURL = "https://www.postemobile.it/areapersonale/privati/Pagine/PM13/Bonus.aspx";
 	request.get(loginURL, function(err, res, body) {
@@ -27,8 +27,8 @@ function loginRedirection() {
 			}
 		form += '}';
 		var formData = JSON.parse(form);
-		formData.ctl00$ctl37$g_ec207ccd_5ede_48e9_83d9_a00a34ae4230$ctl00$tbUsername = loginData().user;
-		formData.ctl00$ctl37$g_ec207ccd_5ede_48e9_83d9_a00a34ae4230$ctl00$tbPassword = loginData().password;
+		formData.ctl00$ctl37$g_ec207ccd_5ede_48e9_83d9_a00a34ae4230$ctl00$tbUsername = loginData.user;
+		formData.ctl00$ctl37$g_ec207ccd_5ede_48e9_83d9_a00a34ae4230$ctl00$tbPassword = loginData.password;
 		request.post({url:loginURL, form: formData}, function(err, res, body) {
 			if (err)
 				throw err;
