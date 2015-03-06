@@ -1,0 +1,17 @@
+{
+  "name": "posterequest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jSparber",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^0.18.0",
+    "html-json": "^1.0.2",
+    "moment": "^2.9.0",
+    "request": "^2.53.0"
+  }
+}
