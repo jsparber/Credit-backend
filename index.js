@@ -33,7 +33,6 @@ function loginRedirection() {
 			if (err)
 				throw err;
 			var data = parsePostemobile(body);
-			console.log(data);
 			reloadData(data);
 		});
 	});
@@ -65,8 +64,8 @@ function parseReloadPostemobile(data){
 	for (var i = 0; i < 3; i++) {
 		var el = bonuses.find(".label_sotto").eq(i).find("span").eq(0).text();
 		output[i] = {};
-		output[i].totale = bonuses.find(".label_sotto").eq(i).find("span").eq(1).text().replace(/[^\d]/g, "");
-		output[i].residui = bonuses.find(".max").eq(i).text().replace(/[^\d]/g, "");
+		output[i].total = bonuses.find(".label_sotto").eq(i).find("span").eq(1).text().replace(/[^\d]/g, "");
+		output[i].remaining = bonuses.find(".max").eq(i).text().replace(/[^\d]/g, "");
 		switch(el) {
 			case "Voce": 
 				output[i].title = "Minuti";
@@ -118,11 +117,10 @@ function parsePostemobile(data) {
 
 	var interval = {};
 	interval.title = "Giorni";
-	console.log(deadline);
 	deadline = moment(deadline, "DD/MM/YYYY");
 	interval.deadline = deadline.format();
 	//console.log(interval.deadline.format());
-	interval.startdate = deadline.add(30, "d").format();
+	interval.startdate = deadline.subtract(30, "d").format();
 	interval.days = "30";
 	result.interval = interval;
 	return result;
