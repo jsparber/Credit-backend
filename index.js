@@ -4,15 +4,15 @@ var cheerio = require('cheerio');
 var html = require('html-json');
 var request = request.defaults({jar: true, followAllRedirects: true});
 
-module.exports = function(loginData){
+module.exports = function(loginData, callback){
 	if(loginData)
-		loginPostemobile(loginData);
+		loginPostemobile(loginData, callback);
 	else
 		console.log("No login data");
 	return true;
 }
 
-function loginPostemobile(loginData) {
+function loginPostemobile(loginData, callback) {
 	var loginURL = 'https://www.postemobile.it/areaprotetta/pagine/login.aspx?ReturnUrl=%2fareapersonale%2fPrivati%2f_layouts%2fAuthenticate.aspx%3fSource%3d%252Fareapersonale%252Fprivati%252FPagine%252FPM13%252FBonus%252Easpx&Source=%2Fareapersonale%2Fprivati%2FPagine%2FPM13%2FBonus%2Easpx';
 	var bonusURL = "https://www.postemobile.it/areapersonale/privati/Pagine/PM13/Bonus.aspx";
 	request.get(loginURL, function(err, res, body) {
@@ -37,12 +37,12 @@ function loginPostemobile(loginData) {
 			if (err)
 				throw err;
 			var data = parsePostemobile(body);
-			reloadData(data);
+			reloadData(data, callback);
 		});
 	});
 }
 
-function reloadData(data) {
+function reloadData(data, callback) {
 	startTime = new Date();
 	request.head("https://www.postemobile.it/areapersonale/privati/Pagine/PM13/ReloadPersonalData.aspx?MSISDN=3337632778&RELOAD=2", function(error, res, body){
 		if (error)
@@ -54,6 +54,7 @@ function reloadData(data) {
 			data.traffic = newData.traffic;
 			data.credit = newData.credit;
 			console.log(data);
+			callback(data);
 		})
 	});
 }
