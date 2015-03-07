@@ -60,6 +60,11 @@ function reloadData(data, callback) {
 			request("https://www.postemobile.it/areapersonale/privati/Pagine/PM13/ReloadPersonalData.aspx?MSISDN=3337632778&RELOAD=3", function(error, res, body){
 				if (error)
 					throw err;
+			if(undefined != body.match(/HAI DIMENTICATO LA TUA USERNAME/gi)){
+				localStorage.clear();
+				error = "login faild";
+				callback(error);
+			}
 				var newData = parseReloadPostemobile(body);
 				data.traffic = newData.traffic;
 				data.credit = newData.credit;
