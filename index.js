@@ -4,12 +4,15 @@ var cheerio = require('cheerio');
 var html = require('html-json');
 var request = request.defaults({jar: true, followAllRedirects: true});
 
-module.exports = function(loginData, callback){
+module.exports = function(callback, loginData){
 	console.log("Start Login");
 	if(loginData)
 		loginPostemobile(loginData, callback);
-	else
+	else{
 		console.log("No login data");
+		if(localStorage.data)
+			reloadData(JSON.parse(localStorage.data), callback);
+	}
 	return true;
 }
 
@@ -62,6 +65,7 @@ function reloadData(data, callback) {
 				data.credit = newData.credit;
 				console.log(data);
 				callback(error, data);
+				localStorage.data = JSON.stringify(data);
 			});
 		});
 }
