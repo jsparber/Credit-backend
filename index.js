@@ -37,27 +37,33 @@ function loginPostemobile(loginData, callback) {
 		request.post({url:loginURL, form: formData}, function(err, res, body) {
 			if (err)
 				throw err;
-			var data = parsePostemobile(body);
-			reloadData(data, callback);
+			var error;
+			if(undefined != body.match(/Verifica che username e password siano stati inseriti correttamente./gi)){
+				error = "login faild";
+				callback(error);
+			}
+			else {
+				var data = parsePostemobile(body);
+				reloadData(data, callback);
+			}
 		});
 	});
 }
 
 function reloadData(data, callback) {
-	startTime = new Date();
-	request.head("https://www.postemobile.it/areapersonale/privati/Pagine/PM13/ReloadPersonalData.aspx?MSISDN=3337632778&RELOAD=2", function(error, res, body){
-		if (error)
-			throw err;
-		request("https://www.postemobile.it/areapersonale/privati/Pagine/PM13/ReloadPersonalData.aspx?MSISDN=3337632778&RELOAD=3", function(error, res, body){
+		request.head("https://www.postemobile.it/areapersonale/privati/Pagine/PM13/ReloadPersonalData.aspx?MSISDN=3337632778&RELOAD=2", function(error, res, body){
 			if (error)
 				throw err;
-			var newData = parseReloadPostemobile(body);
-			data.traffic = newData.traffic;
-			data.credit = newData.credit;
-			console.log(data);
-			callback(data);
-		})
-	});
+			request("https://www.postemobile.it/areapersonale/privati/Pagine/PM13/ReloadPersonalData.aspx?MSISDN=3337632778&RELOAD=3", function(error, res, body){
+				if (error)
+					throw err;
+				var newData = parseReloadPostemobile(body);
+				data.traffic = newData.traffic;
+				data.credit = newData.credit;
+				console.log(data);
+				callback(error, data);
+			});
+		});
 }
 
 function parseReloadPostemobile(data){
