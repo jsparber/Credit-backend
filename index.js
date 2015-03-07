@@ -5,6 +5,7 @@ var html = require('html-json');
 var request = request.defaults({jar: true, followAllRedirects: true});
 
 module.exports = function(loginData, callback){
+	console.log("Start Login");
 	if(loginData)
 		loginPostemobile(loginData, callback);
 	else
