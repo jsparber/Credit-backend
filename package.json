@@ -1,5 +1,5 @@
 {
-  "name": "posterequest",
+  "name": "Credit-backend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "jSparber",
-  "license": "ISC",
+  "license": "AGPLv3",
   "dependencies": {
     "cheerio": "^0.18.0",
     "html-json": "^1.0.2",
