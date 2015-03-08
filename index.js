@@ -66,7 +66,7 @@ function reloadData(data, callback) {
 				if (error)
 					callback(error);
 				else{
-					if(undefined != body.match(/HAI DIMENTICATO LA TUA USERNAME/gi)){
+					if(undefined != body.match(/HAI DIMENTICATO LA TUA USERNAME/gi) || body == ""){
 						loginPostemobile(data, callback);
 					}
 					else{
