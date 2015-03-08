@@ -5,6 +5,15 @@ var html = require('html-json');
 var request = request.defaults({jar: true, followAllRedirects: true});
 
 module.exports = function(data, callback){
+	switch (data.provider) {
+		case "Postemobile":
+			postemobile(data, callback);
+			break;
+		default:
+			callback({"msg" : data.provider + " is not yet supported"});
+	}
+}
+function postemobile(data, callback) {
 	//if there is no phone number so he was never logged in
 	if(!data.number)
 		loginPostemobile(data, callback);
@@ -48,6 +57,7 @@ function loginPostemobile(userData, callback) {
 						var serverData = parsePostemobile(body);
 						serverData.user = userData.user;
 						serverData.password = userData.password;
+						serverData.provider = userData.provider;
 						reloadData(serverData, callback);
 					}
 				}
