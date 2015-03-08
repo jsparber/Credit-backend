@@ -1,14 +1,15 @@
 # Credit-backend
 Javascript backend for the Credit app
 
-## Run
-Clone the repo and
-create a file named loginData.js with:
+## Usage
+npm install jsparber/Credit-backend
 ```js
-    module.exports = function() {
-      var data = {};
-      data.user = "";
-      data.password = "";
-      return data;
-    }
+var loadUserData = require('Credit-backend');
+loadUserData({user: "myuser", password: "mypassword"}, callback);
+
+function callback(error, data){
+	if(error)
+		throw error;
+	console.log(data);
+}
 ```
