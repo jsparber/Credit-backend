@@ -4,75 +4,82 @@ var cheerio = require('cheerio');
 var html = require('html-json');
 var request = request.defaults({jar: true, followAllRedirects: true});
 
-module.exports = function(callback, loginData){
-	console.log("Start Login");
-	if(loginData)
-		loginPostemobile(loginData, callback);
-	else{
-		console.log("No login data");
-		if(localStorage.data)
-			reloadData(JSON.parse(localStorage.data), callback);
-	}
-	return true;
+module.exports = function(data, callback){
+	//if there is no phone number so he was never logged in
+	if(!data.number)
+		loginPostemobile(data, callback);
+	else
+		reloadData(data, callback);
 }
 
-function loginPostemobile(loginData, callback) {
+function loginPostemobile(userData, callback) {
 	var loginURL = 'https://www.postemobile.it/areaprotetta/pagine/login.aspx?ReturnUrl=%2fareapersonale%2fPrivati%2f_layouts%2fAuthenticate.aspx%3fSource%3d%252Fareapersonale%252Fprivati%252FPagine%252FPM13%252FBonus%252Easpx&Source=%2Fareapersonale%2Fprivati%2FPagine%2FPM13%2FBonus%2Easpx';
-	var bonusURL = "https://www.postemobile.it/areapersonale/privati/Pagine/PM13/Bonus.aspx";
-	request.get(loginURL, function(err, res, body) {
-		if (err)
-			throw err;
-		var $ = cheerio.load(body);
-		var data = $("#aspnetForm").find('input');
-		var form = '{'
-			for(var i = 0; i < data.length; i++) {
-				if (!data[i].attribs.value)
-					data[i].attribs.value = "";
-				form += ('"' + 
-						data[i].attribs.name + '" : "' + 
-						data[i].attribs.value + '"' +
-						(i + 1 < data.length ? "," : ""));
-			}
-		form += '}';
-		var formData = JSON.parse(form);
-		formData.ctl00$ctl37$g_ec207ccd_5ede_48e9_83d9_a00a34ae4230$ctl00$tbUsername = loginData.user;
-		formData.ctl00$ctl37$g_ec207ccd_5ede_48e9_83d9_a00a34ae4230$ctl00$tbPassword = loginData.password;
-		request.post({url:loginURL, form: formData}, function(err, res, body) {
-			if (err)
-				throw err;
-			var error;
-			if(undefined != body.match(/Verifica che username e password siano stati inseriti correttamente./gi)){
-				error = "login faild";
-				callback(error);
-			}
-			else {
-				var data = parsePostemobile(body);
-				reloadData(data, callback);
-			}
-		});
+
+	request.get(loginURL, function(error, res, body) {
+		if (error)
+			callback(error);
+		else{
+			var $ = cheerio.load(body);
+			var data = $("#aspnetForm").find('input');
+			var form = '{'
+				for(var i = 0; i < data.length; i++) {
+					if (!data[i].attribs.value)
+						data[i].attribs.value = "";
+					form += ('"' + 
+							data[i].attribs.name + '" : "' + 
+							data[i].attribs.value + '"' +
+							(i + 1 < data.length ? "," : ""));
+				}
+			form += '}';
+			var formData = JSON.parse(form);
+			formData.ctl00$ctl37$g_ec207ccd_5ede_48e9_83d9_a00a34ae4230$ctl00$tbUsername = userData.user;
+			formData.ctl00$ctl37$g_ec207ccd_5ede_48e9_83d9_a00a34ae4230$ctl00$tbPassword = userData.password;
+
+			request.post({url:loginURL, form: formData}, function(error, res, body) {
+				if (error)
+					callback(error);
+				else{
+					if(undefined != body.match(/Verifica che username e password siano stati inseriti correttamente./gi)){
+						var error = {};
+						error.msg = "incorrect credentials";
+						callback(error);
+					}
+					else {
+						var serverData = parsePostemobile(body);
+						serverData.user = userData.user;
+						serverData.password = userData.password;
+						reloadData(serverData, callback);
+					}
+				}
+			});
+		}
 	});
 }
 
+//Load new data if already logged in, when the session is expired relogin
 function reloadData(data, callback) {
-		request.head("https://www.postemobile.it/areapersonale/privati/Pagine/PM13/ReloadPersonalData.aspx?MSISDN=3337632778&RELOAD=2", function(error, res, body){
-			if (error)
-				throw err;
+	request.head("https://www.postemobile.it/areapersonale/privati/Pagine/PM13/ReloadPersonalData.aspx?MSISDN=3337632778&RELOAD=2", function(error, res, body){
+		if (error)
+			callback(error);
+		else{
 			request("https://www.postemobile.it/areapersonale/privati/Pagine/PM13/ReloadPersonalData.aspx?MSISDN=3337632778&RELOAD=3", function(error, res, body){
 				if (error)
-					throw err;
-			if(undefined != body.match(/HAI DIMENTICATO LA TUA USERNAME/gi)){
-				localStorage.clear();
-				error = "login faild";
-				callback(error);
-			}
-				var newData = parseReloadPostemobile(body);
-				data.traffic = newData.traffic;
-				data.credit = newData.credit;
-				console.log(data);
-				callback(error, data);
-				localStorage.data = JSON.stringify(data);
+					callback(error);
+				else{
+					if(undefined != body.match(/HAI DIMENTICATO LA TUA USERNAME/gi)){
+						loginPostemobile(data, callback);
+					}
+					else{
+						var newData = parseReloadPostemobile(body);
+						data.traffic = newData.traffic;
+						data.credit = newData.credit;
+						console.log(data);
+						callback(error, data);
+					}
+				}
 			});
-		});
+		}
+	});
 }
 
 function parseReloadPostemobile(data){
